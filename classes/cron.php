@@ -18,7 +18,7 @@ class Youtube_Liked_Cron {
 	*/
 	public static function add_new_intervals($schedules) {
 		$schedules['10min'] = array(
-			'interval' => 60 * 10,
+			'interval' => 60 * 2,
 			'display' => __('Every 10 Min')
 		);	
 
@@ -68,8 +68,9 @@ class Youtube_Liked_Cron {
 			/* prepare post body and title */
 			$postbody = self::replace_tokens(self::$settings['postbody'] , $data );
 			$title = self::replace_tokens(self::$settings['title'] , $data );
-			
+		
 			/* create post */
+			kses_remove_filters(); // remove filter
 			$post_id = wp_insert_post(
 				array(
 					'comment_status'	=>	'closed',
@@ -77,13 +78,15 @@ class Youtube_Liked_Cron {
 					'post_title'		=>	$title,
 					'post_content'		=>	$postbody,
 					'post_status'		=>	'publish',
-					'post_type'		=>	'liked-videos'
+					'post_type'		=>	'liked-videos',
+					'filter' => true
 				)
 			);
+			kses_init_filters(); 
 
 			self::$history[] = $video_id;
 		}
-
+		
 		self::update_history();
 	}
 	
@@ -124,4 +127,5 @@ class Youtube_Liked_Cron {
 }
 
 new Youtube_Liked_Cron;
+//delete_option( 'yt_liked_videos' );
 		
